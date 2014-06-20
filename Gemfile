@@ -12,6 +12,7 @@ gem 'haml'
 gem 'chartkick'
 gem 'stamp'
 gem 'numbers_and_words'
+gem 'sidekiq'
 
 gem 'jquery-rails'
 
@@ -21,6 +22,7 @@ group :development do
   gem 'annotate'
   gem 'spring'
   gem 'spring-commands-rspec'
+  gem 'spring-commands-sidekiq'
   gem 'better_errors'
   gem 'binding_of_caller'
 end
