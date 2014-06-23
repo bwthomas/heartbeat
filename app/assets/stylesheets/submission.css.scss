@@ -1,9 +1,6 @@
 @import 'mixins';
 
-.submission {
-}
-
-.submission-thanks {
+.submission.completed {
   margin: 0 10% 1em;
 }
 
@@ -13,6 +10,120 @@
 
   a {
     color: #999;
+  }
+}
+
+.submission {
+  .arrows {
+    position: absolute;
+    top: 10px;
+    bottom: auto;
+    left: 0;
+    right: 0;
+
+    .arrow {
+      color: #ccc;
+      cursor: pointer;
+      padding: 1em;
+
+      &:hover {
+        color: #888;
+      }
+
+      &.prev {
+        float: left;
+      }
+
+      &.next {
+        float: right;
+      }
+    }
+  }
+
+  &.spotlight {
+    overflow: hidden;
+    margin: 0 -1em;
+
+    .arrows {
+      bottom: 10px;
+      top: auto;
+    }
+
+    .metrics {
+      margin: 0;
+      white-space: nowrap;
+
+      .metric {
+        display: inline-block;
+        white-space: normal;
+        width: 600px;
+        position: relative;
+        border: 0;
+        padding: 1em 2em 0;
+
+        .metric-description {
+          min-height: 3em;
+        }
+
+        .comments {
+          display: none;
+        }
+
+        .rating-value {
+          display: none;
+        }
+      }
+    }
+  }
+
+  &.summary {
+    .metrics {
+      white-space: normal;
+
+      .metric {
+        display: block;
+
+        .rating-value {
+          display: block;
+          float: left;
+          font-size: 2em;
+          color: #777;
+        }
+
+        .rating {
+          display: none;
+        }
+
+        .comments {
+          .comments-toggle {
+            display: none;
+          }
+
+          .comments-input {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+
+  .progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1em;
+    background: rgba(#000, 0.1);
+
+    .meter {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0;
+      min-width: 10px;
+      background: $blue;
+    }
   }
 }
 
@@ -84,7 +195,7 @@
 
     height: 50px;
     line-height: 50px;
-    margin: 0.5em;
+    margin: 0 0.5em 2em;
   }
 
   .rating-bookend {
@@ -107,7 +218,7 @@
     }
 
     label {
-      @include button(#266ACC);
+      @include button($blue);
       color: rgba(#fff, 0.8);
       font-size: 1.4em;
       cursor: pointer;
@@ -159,6 +270,9 @@
     input:checked + label {
       opacity: 1;
     }
+  }
+
+  .comments {
   }
 
   .comments-toggle {
