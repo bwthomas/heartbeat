@@ -28,4 +28,50 @@ form {
   .input, .submit {
     margin-top: 1em;
   }
+
+  fieldset {
+    border: 1px rgba(#000, 0.2) solid;
+    border-radius: 2px;
+    margin: 25px 0;
+    padding: 0 15px 15px;
+
+    legend {
+      font-size: 17px;
+      color: #777;
+      padding: 0 10px;
+    }
+  }
+}
+
+form + p {
+  margin-top: 20px;
+}
+
+.input {
+  label + select {
+    margin-left: 10px;
+  }
+
+  input.statebox {
+    float: right;
+  }
+
+  .collection {
+    @include clearfix;
+
+    label {
+      display: block;
+      width: 120px;
+      margin-right: 10px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      float: left;
+
+      input {
+        vertical-align: middle;
+        margin-right: 5px;
+      }
+    }
+  }
 }

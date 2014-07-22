@@ -1,6 +1,9 @@
 class Result
   include ActiveModel::Model
 
+  MINIMUM_REPRESENTATION = 0.5 # %
+  MINIMUM_SIZE = 2
+
   # e.g. 1.week
   attr_accessor :period
 
@@ -25,7 +28,19 @@ class Result
   end
 
   def complete?
-    representation > 0.5
+    representation >= MINIMUM_REPRESENTATION
+  end
+
+  def incomplete?
+    not complete?
+  end
+
+  def sufficient?
+    size >= MINIMUM_SIZE
+  end
+
+  def insufficient?
+    not sufficient?
   end
 
   def persisted?
@@ -130,7 +145,7 @@ class Result
 
     @unity ||= begin
       # unity = 1 - variance(ratings) / variance(max_rating, min_rating)
-      unity_ratings = sample.complete.joins(:user).select("1.0 - var_samp(rating) / #{[Heartbeat::VALID_RATINGS.min, Heartbeat::VALID_RATINGS.max].variance} as unity").group('users.manager_email').map(&:unity)
+      unity_ratings = sample.complete.joins(:user).select("1.0 - var_samp(rating) / #{[Heartbeat::VALID_RATINGS.min, Heartbeat::VALID_RATINGS.max].variance} as unity").group('users.manager_user_id').map(&:unity)
 
       # average the non-nils to get our volatility score
       unity_ratings.reject(&:nil?).mean.round(2) rescue 0.0

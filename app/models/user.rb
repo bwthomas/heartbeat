@@ -6,18 +6,21 @@
 #  name            :text
 #  email           :text             not null
 #  manager_user_id :uuid
-#  manager_email   :text
 #  created_at      :datetime
 #  updated_at      :datetime
+#  admin           :boolean          default(FALSE), not null
+#  active          :boolean          default(TRUE), not null
+#  tags            :string(255)      default([]), is an Array
 #
 
 class User < ActiveRecord::Base
+  include TaggableConcern
 
   has_many :submissions, dependent: :destroy
   has_many :submission_metrics, through: :submissions
-  belongs_to :manager, class_name: 'User', foreign_key: :manager_user_id
 
-  before_save :set_manager
+  belongs_to :manager, class_name: 'User', foreign_key: :manager_user_id
+  has_many   :reports, class_name: 'User', foreign_key: :manager_user_id
 
   devise :omniauthable
 
@@ -28,12 +31,21 @@ class User < ActiveRecord::Base
     def find_for_google_oauth2 access_token, signed_in_resource = nil
       data = access_token.info
 
-      User.find_or_initialize_by(email: data['email']) do |user|
+      user = User.find_or_initialize_by(email: data['email']) do |user|
         user.name   = data['name']
         user.active = false
 
         user.save! if user.email.to_s.ends_with? "@#{ENV['GOOGLE_APPS_DOMAIN']}"
       end
+
+      # take this opportunity to update our records
+      if user.persisted?
+        user.name = data['name']
+
+        user.save! if user.changed?
+      end
+
+      user
     end
   end
 
@@ -62,24 +74,29 @@ class User < ActiveRecord::Base
   end
 
   def manager?
-    User.where(manager_email: email).any?
+    reports.any?
   end
 
-  def team
-    if manager?
-      User.where(manager_email: email) | User.where(email: email)
-    else
-      User.where(manager_email: manager_email)
+  def inactive?
+    not active?
+  end
+
+  def managers
+    @managers ||= begin
+      user  = self
+      users = []
+
+      while user.manager.present? do
+        users << user.manager
+        user = user.manager
+      end
+
+      User.where(id: users.reverse.map(&:id))
     end
   end
 
-
-  protected
-
-  def set_manager
-    if manager_email.present?
-      self.manager = User.find_by_email(manager_email)
-    end
+  def vertical
+    User.where(id: managers + [self] + reports)
   end
 
 end

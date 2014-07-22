@@ -3,11 +3,18 @@
 
   %nav
     %ul
+      %li= link_to 'All', [:admin, :users]
       %li= link_to 'Import', [:import, :admin, :users]
 
 %table
   - @users.each do |user|
-    %tr
+    %tr{class: ('muted strikethrough' if user.inactive?)}
+      %td= link_to user.abbreviated_name, [:edit, :admin, user]
       %td= user.email
-      - if Rails.env.development?
-        %td= link_to 'Become', [:become, :admin, user], method: :post
+      %td.muted= user.tags_as_string
+      %td
+        - if user.manager.nil?
+          .danger{title: 'no manager!'}= icon('user')
+      %td
+        - if Rails.env.development?
+          = link_to 'Become', [:become, :admin, user], method: :post

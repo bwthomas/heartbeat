@@ -10,9 +10,11 @@
 #  created_at      :datetime
 #  updated_at      :datetime
 #  comments_public :boolean          default(TRUE)
+#  tags            :string(255)      default([]), is an Array
 #
 
 class Submission < ActiveRecord::Base
+  include TaggableConcern
 
   belongs_to :user
   has_many :submission_metrics, dependent: :delete_all
@@ -27,6 +29,8 @@ class Submission < ActiveRecord::Base
 
   before_create :seed_metrics!
   before_save -> { false }, if: :closed?
+
+  after_initialize :set_tags_from_user, unless: :persisted?
 
 
   include CompletedConcern
@@ -78,6 +82,13 @@ class Submission < ActiveRecord::Base
     {
       'url' => url,
     }
+  end
+
+
+  protected
+
+  def set_tags_from_user
+    self.tags = user.try(:tags)
   end
 
 end

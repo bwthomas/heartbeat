@@ -1,0 +1,24 @@
+.result
+  %p.timeframe
+    Tags for the week of #{@result.start_date.format_like 'August 4, 2014'}
+
+  .previous-link
+    - if @result.previous.present?
+      = link_to scope: result_scope, start_date: @result.previous.to_param do
+        = icon 'arrow-left'
+    - else
+      %span.muted= icon 'arrow-left'
+
+  .next-link
+    - if @result.next.present?
+      = link_to scope: result_scope, start_date: @result.next.to_param do
+        = icon 'arrow-right'
+    - else
+      %span.muted= icon 'arrow-right'
+
+  %section.tags
+    %ul
+      - @tags_and_counts.each do |tag, count|
+        %li
+          = link_to "##{tag}", [:tag_result, tag: tag]
+          (#{count})

@@ -6,9 +6,11 @@
 #  name            :text
 #  email           :text             not null
 #  manager_user_id :uuid
-#  manager_email   :text
 #  created_at      :datetime
 #  updated_at      :datetime
+#  admin           :boolean          default(FALSE), not null
+#  active          :boolean          default(TRUE), not null
+#  tags            :string(255)      default([]), is an Array
 #
 
 require 'spec_helper'
@@ -59,31 +61,9 @@ describe User do
     specify { build(:user, name: nil).abbreviated_name.should be_nil }
   end
 
-  describe '#set_manager' do
-    let(:manager) { @manager ||= create :user }
-
-    it 'should create the manager relationship' do
-      subject.manager_email = manager.email
-      subject.send :set_manager
-      subject.manager.should == manager
-    end
-
-    context 'in the absence of said manager' do
-      it 'should do nothing' do
-        subject.manager_email = Faker::Internet.email
-        subject.send :set_manager
-        subject.manager.should be_nil
-      end
-    end
-
-    it 'should be invoked around save time' do
-      subject.should_receive(:set_manager).and_call_original
-      subject.manager_email = manager.email
-      subject.save!
-
-      subject.should_not be_changed
-      subject.manager.should == manager
-    end
+  describe '#manager?' do
+    specify { create(:user, reports: build_list(:user, 2)).should be_manager }
+    specify { create(:user, reports: []).should_not be_manager }
   end
 
   describe '#to_liquid' do
@@ -95,6 +75,33 @@ describe User do
         'first_name' => 'Foo',
         'email' => 'foo@bar.com',
       }
+    end
+  end
+
+  describe '#managers' do
+    it 'should be the management chain, top to bottom' do
+      dfish = create :user
+      dhall = create :user, manager: dfish
+      jjon  = create :user, manager: dhall
+      me    = create :user, manager: jjon
+      blake = create :user, manager: dhall
+
+      me.managers.should == [dfish, dhall, jjon]
+    end
+  end
+
+  describe '#vertical' do
+    it 'should be #managers + me + #reports' do
+      dfish = create :user
+      dhall = create :user, manager: dhall
+      jjon  = create :user, manager: jjon
+      me    = create :user, manager: jjon
+      trogdor = create_list :user, 5, manager: me
+
+      blake = create :user, manager: dhall
+      shodan = create_list :user, 5, manager: blake
+
+      me.vertical.should == me.managers + [me] + me.reports
     end
   end
 
