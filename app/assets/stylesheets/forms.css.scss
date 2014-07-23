@@ -56,6 +56,10 @@ form + p {
     float: right;
   }
 
+  .text {
+    margin-left: 5px;
+  }
+
   .collection {
     @include clearfix;
 
